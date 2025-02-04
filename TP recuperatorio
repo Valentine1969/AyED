@@ -1,0 +1,96 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+// Definimos la estructura Material
+struct Material {
+    string nombre;
+    float peso;
+};
+
+// Definimos la estructura NodoAr que representa un nodo en el árbol binario
+template <typename T>
+struct NodoAr {
+    T dato;              // El dato que almacena (en este caso un objeto de tipo Material)
+    NodoAr* izquierdo;    // Apunta al hijo izquierdo
+    NodoAr* derecho;      // Apunta al hijo derecho
+};
+
+// Función para insertar un material en el árbol binario, ordenado por el nombre
+template <typename T>
+void insertar(NodoAr<T>*& raiz, T dato) {
+    if (raiz == nullptr) {
+        raiz = new NodoAr<T>{dato, nullptr, nullptr};  // Crear el nodo si está vacío
+    } else {
+        if (dato.nombre < raiz->dato.nombre) {
+            insertar(raiz->izquierdo, dato);  // Si el nombre es menor, insertamos en el subárbol izquierdo
+        } else {
+            insertar(raiz->derecho, dato);    // Si el nombre es mayor o igual, insertamos en el subárbol derecho
+        }
+    }
+}
+
+// Función para mostrar el árbol en orden (inorden)
+template <typename T>
+void mostrarInOrden(NodoAr<T>* raiz) {
+    if (raiz != nullptr) {
+        mostrarInOrden(raiz->izquierdo);  // Recorrer subárbol izquierdo
+        cout << raiz->dato.nombre << ": " << raiz->dato.peso << endl;  // Mostrar el nodo
+        mostrarInOrden(raiz->derecho);    // Recorrer subárbol derecho
+    }
+}
+
+// Template para calcular los resultados: sumatoria total, cantidad de elementos y peso promedio
+template <typename T, typename Res>
+void calcularResultados(NodoAr<T>* raiz, Res& resultados) {
+    if (raiz != nullptr) {
+        // Procesamos el nodo actual
+        resultados.suma += raiz->dato.peso;
+        resultados.cantidad++;
+        calcularResultados(raiz->izquierdo, resultados);  // Recorrer subárbol izquierdo
+        calcularResultados(raiz->derecho, resultados);    // Recorrer subárbol derecho
+    }
+}
+
+// Estructura para almacenar los resultados
+struct Resultados {
+    float suma = 0;       // Sumatoria total de pesos
+    int cantidad = 0;     // Cantidad de elementos
+    float promedio() const { return cantidad > 0 ? suma / cantidad : 0; }
+};
+
+int main() {
+    NodoAr<Material>* raiz = nullptr;  // Inicializamos el árbol con nullptr
+
+    // Insertamos los materiales en el árbol
+    insertar(raiz, {"Hierro", 6900.7});
+    insertar(raiz, {"Arcilla", 384.35});
+    insertar(raiz, {"Cobre", 4507.5});
+    insertar(raiz, {"Aluminio", 2250.2});
+    insertar(raiz, {"Plomo", 10527.15});
+    insertar(raiz, {"Litio", 8412.28});
+    insertar(raiz, {"Zinc", 142.4});
+
+    // Inicializamos los resultados antes de insertar los materiales
+    Resultados resultados;
+    calcularResultados(raiz, resultados);
+    cout << "Suma: " << resultados.suma << endl;
+    cout << "Cantidad: " << resultados.cantidad << endl;
+
+    // Mostrar el árbol en orden
+    cout << "======= INORDEN =======" << endl;
+    mostrarInOrden(raiz);
+
+    // Llamamos nuevamente a la función para calcular los resultados después de insertar los datos
+    resultados.suma = 0;  // Resetear los resultados
+    resultados.cantidad = 0;
+    calcularResultados(raiz, resultados);
+
+    // Mostrar los resultados finales
+    cout << "Suma: " << resultados.suma << endl;
+    cout << "Cantidad: " << resultados.cantidad << endl;
+    cout << "Promedio: " << resultados.promedio() << endl;
+
+    return 0;
+}
